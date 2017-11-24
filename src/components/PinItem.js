@@ -1,13 +1,15 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 
+import './PinItem.css';
 
 const PinItem = ({ imgUrl, title, description, siteUrl, userId, userPhoto, displayName, onClickUser, onDelete, currentUser, onImgError }) => {
     return (
-        <div className="column is-3">
+        
+        <div className="column is-full-mobile is-one-third-tablet is-one-quarter-desktop">
             <div className="card">
                 <div className="card-image">
-                    <figure className="image is-4by3">
+                    <figure className="image">
                         <img onError={onImgError} src={imgUrl} alt="Image of pin"/>
                     </figure>
                 </div>
@@ -15,11 +17,11 @@ const PinItem = ({ imgUrl, title, description, siteUrl, userId, userPhoto, displ
                     <div className="media">
                         <div className="media-left">
                             <figure className="image is-48x48">
-                                <img src="https://bulma.io/images/placeholders/96x96.png" alt="User photo" />
+                                <img src={userPhoto}/>
                             </figure>
                         </div>
                         <div className="media-content">
-                            <a onClick={onClickUser}>{displayName}</a>
+                            <a onClick={onClickUser} onError={onImgError}>{displayName}</a>
                         </div>
                     </div>
                     <div className="content">

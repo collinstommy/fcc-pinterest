@@ -1,0 +1,12 @@
+.navbar {
+    padding: 3px;
+    margin-bottom: 8px;
+}
+
+.logo {
+    border-radius: 50%;
+    background-color: white;
+    color: black;
+    padding: 8px 14px;
+    font-weight: bolder;
+}

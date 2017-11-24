@@ -4,7 +4,8 @@ import firebase from 'firebase'
 import PinItem from './PinItem';
 import AddModal from './AddPinModal';
 import LoginModal from './LoginModal';
-
+import Masonry from 'react-masonry-component';
+import './Home.css';
 
 class Home extends Component {
   state = {
@@ -17,12 +18,13 @@ class Home extends Component {
     user: null
   }
   componentWillMount() {
-    /* Create reference to messages in Firebase Database */
     let pinItemsCollection = fire.database().ref('pins').orderByKey().limitToLast(100);
+
     pinItemsCollection.on('child_added', snapshot => {
       const item = { ...snapshot.val(), id: snapshot.key }
       this.setState({ pins: [item].concat(this.state.pins) });
     });
+
     pinItemsCollection.on('child_removed', snapshot => {
       const deletedPinId = snapshot.key;
       const pins = this.state.pins.filter(pin => pin.id !== deletedPinId);
@@ -38,7 +40,16 @@ class Home extends Component {
     const displayName = user.displayName
       ? user.displayName
       : user.email.substring(0, user.email.lastIndexOf("@"));
-    const newPin = { title, imgUrl, description, siteUrl, email: user.email, displayName, userId: user.uid };
+    const newPin = {
+      title,
+      imgUrl,
+      description,
+      siteUrl,
+      email: user.email,
+      displayName,
+      userId: user.uid,
+      userPhoto: user.photoURL
+    };
 
     fire.database().ref('pins').push(newPin);
     this.setState({ showAddModal: false, imgUrl: "", title: "", description: "", id: "" });
@@ -154,6 +165,20 @@ class Home extends Component {
     const userIsLoggedIn = user !== null;
     const authenticationButtons = userIsLoggedIn ? loggedInButtons : loggedOutButtons;
 
+    const pinItems = this.state.pins.map(pin =>
+      <PinItem key={pin.id}
+        imgUrl={pin.imgUrl}
+        title={pin.title}
+        description={pin.description}
+        userId={pin.userId}
+        displayName={pin.displayName}
+        onClickUser={() => this.getUserPinsById(pin.userId)}
+        currentUser={this.state.user}
+        onDelete={() => this.deletePin(pin.id)}
+        onImgError={this.handleImageError}
+        userPhoto={pin.userPhoto}>
+      </PinItem>);
+
     return (
       <div>
         {this.state.showAddModal &&
@@ -169,11 +194,11 @@ class Home extends Component {
             handleClose={this.handleHideLoginModal}
           />
         }
-        <nav className="navbar is-transparent">
+        <nav className="navbar is-dark">
           <div className="navbar-start">
             <div className="navbar-item">
-              <h1 className="subtitle">
-                Fitrest
+              <h1 className='logo'>
+                P
             </h1>
             </div>
             {userIsLoggedIn && <a className="navbar-item" onClick={this.getCurrentUserPins}>
@@ -187,23 +212,15 @@ class Home extends Component {
             {authenticationButtons}
           </div>
         </nav>
-        <div className="container">
-          <div className="columns is-multiline">
-            { /* Render the list of messages */
-              this.state.pins.map(pin =>
-                <PinItem key={pin.id}
-                  imgUrl={pin.imgUrl}
-                  title={pin.title}
-                  description={pin.description}
-                  userId={pin.userId}
-                  displayName={pin.displayName}
-                  onClickUser={() => this.getUserPinsById(pin.userId)}
-                  currentUser={this.state.user}
-                  onDelete={() => this.deletePin(pin.id)}
-                  onImgError={this.handleImageError}>
-                </PinItem>)
-            }
-          </div>
+        <div className='container'>
+          <Masonry
+            className={'my-gallery-class'} // default ''
+            options={{ transitionDuration: 0 }} // default {}
+            disableImagesLoaded={false} // default false
+            updateOnEachImageLoad={false} // default false and works only if disableImagesLoaded is false
+          >
+            {pinItems}
+          </Masonry>
         </div>
       </div>
     );
